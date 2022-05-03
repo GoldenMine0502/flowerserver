@@ -19,28 +19,28 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/wcs/image")
+@RequestMapping("/images")
 public class FileController {
 
     private static final Logger logger = LoggerFactory.getLogger(FileController.class);
     private final StorageService storageService;
 
     @Autowired
-    public FileController(StorageService storageService){
+    public FileController(StorageService storageService) {
         this.storageService = storageService;
     }
 
     @PostMapping("/upload")
     public ResponseEntity<Response> uploadImage(@RequestParam("file") MultipartFile file,
-                                                @RequestParam("userName") String userName) throws IOException {
+                                                @RequestParam("id") String userName) throws IOException {
         Response res = new Response();
-        try{
+        try {
             String result = storageService.saveFile(file, userName);
-            res.setImageLocation("/"+userName+"/"+result);
+            res.setImageLocation("/" + userName + "/" + result);
             res.setMessage("done");
             res.setSuccess(true);
             return new ResponseEntity<Response>(res, HttpStatus.OK);
-        }catch (Exception e){
+        } catch (Exception e) {
             res.setMessage("failed");
             res.setSuccess(false);
             return new ResponseEntity<Response>(res, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -49,20 +49,20 @@ public class FileController {
 
     @PostMapping("/post/upload")
     public ResponseEntity<Response> postImageUpload(@RequestParam("files") MultipartFile[] files,
-                                                    @RequestParam("postName")String postName) {
+                                                    @RequestParam("id") String postName) {
         Response res = new Response();
         List<String> results = new ArrayList<>();
         List<String> imageLocations = new ArrayList<>();
-        try{
+        try {
             results = storageService.saveFiles(files, postName);
-            for(String result : results){
-                imageLocations.add("/"+postName+"/"+result);
+            for (String result : results) {
+                imageLocations.add("/" + postName + "/" + result);
             }
             res.setImageLocations(imageLocations);
             res.setMessage("done");
             res.setSuccess(true);
             return new ResponseEntity<Response>(res, HttpStatus.OK);
-        }catch (Exception e){
+        } catch (Exception e) {
             res.setMessage("failed");
             res.setSuccess(false);
             return new ResponseEntity<Response>(res, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -75,29 +75,31 @@ public class FileController {
                                                  HttpServletRequest request) {
         // Load file as Resource
 
+        Resource resource = null;
+
         try {
-            Resource resource = storageService.loadFileAsResource(userName, fileName);
-            // Try to determine file's content type
-            String contentType = null;
-            try {
-                contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
-            } catch (IOException ex) {
-                logger.info("Could not determine file type.");
-            }
-
-            // Fallback to the default content type if type could not be determined
-            if(contentType == null) {
-                contentType = "application/octet-stream";
-            }
-
-            return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType(contentType))
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-                    .body(resource);
+            resource = storageService.loadFileAsResource(userName, fileName);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
 
-        return ResponseEntity.notFound().;
+        // Try to determine file's content type
+        String contentType = null;
+        try {
+            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
+        } catch (IOException ex) {
+            logger.info("Could not determine file type.");
+        }
+
+        // Fallback to the default content type if type could not be determined
+        if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
+
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                .body(resource);
     }
 }

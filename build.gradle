@@ -17,6 +17,7 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    implementation 'com.google.code.gson:gson:2.9.0'
 }
 
 tasks.named('test') {
