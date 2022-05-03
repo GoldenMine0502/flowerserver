@@ -23,3 +23,15 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+//jar {
+//    manifest {
+//        attributes 'Main-Class': 'kr.goldenmine.FlowerserverApplication'
+//    }
+//
+//    from {
+//        configurations.implementation.collect { it.isDirectory() ? it : zipTree(it) }
+//    }
+//}
+
+
