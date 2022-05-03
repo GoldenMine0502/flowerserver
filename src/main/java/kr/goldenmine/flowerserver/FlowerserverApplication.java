@@ -8,8 +8,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @EnableConfigurationProperties(FileStorageProperties.class)
 public class FlowerserverApplication {
 
-
-
     public static void main(String[] args) {
         SpringApplication.run(FlowerserverApplication.class, args);
     }
