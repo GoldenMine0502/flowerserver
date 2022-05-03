@@ -4,12 +4,14 @@ import java.util.List;
 
 public class Article {
     private int id;
+    private String authorId;
     private String title;
     private String context;
     private List<Integer> imageIds;
 
-    public Article(int id, String title, String context, List<Integer> imageIds) {
+    public Article(int id, String authorId, String title, String context, List<Integer> imageIds) {
         this.id = id;
+        this.authorId = authorId;
         this.title = title;
         this.context = context;
         this.imageIds = imageIds;
@@ -17,6 +19,10 @@ public class Article {
 
     public int getId() {
         return id;
+    }
+
+    public String getAuthorId() {
+        return authorId;
     }
 
     public String getTitle() {

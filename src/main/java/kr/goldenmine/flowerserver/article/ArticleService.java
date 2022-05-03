@@ -25,17 +25,23 @@ public class ArticleService {
         load();
     }
 
-    public void writeArticle(Profile profile, Article article) {
+    public int writeArticle(Profile profile, Article article) {
         // 지금까지 쓰인 모든 글의 갯수가 곧 쓰일 글의 id
-        int currentArticleId = articles.size();
 
-        Article idArticle = new Article(currentArticleId, article.getTitle(), article.getContext(), article.getImageIds());
-
-        profile.addNewArticleId(currentArticleId);
+        int articleId;
 
         synchronized (articlesKey) {
+            int currentArticleId = articles.size();
+            Article idArticle = new Article(currentArticleId, article.getAuthorId(), article.getTitle(), article.getContext(), article.getImageIds());
+
             articles.add(idArticle);
+
+            articleId = currentArticleId;
         }
+
+        profile.addNewArticleId(articleId);
+
+        return articleId;
     }
 
     public Article getArticle(int id) {

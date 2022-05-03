@@ -37,25 +37,27 @@ public class ArticleController {
         HttpSession session = request.getSession();
         Profile profile = (Profile) session.getAttribute("profile");
 
-        Article article = new Article(0, title, context, imageIds);
 
         // 글 쓰기 결과 리턴
         JsonObject obj = new JsonObject();
 
         if(profile != null) {
-            articleService.writeArticle(profile, article);
+            Article article = new Article(0, profile.getId(), title, context, imageIds);
+            int id = articleService.writeArticle(profile, article);
+            article = new Article(id, profile.getId(), title, context, imageIds);
 
             obj.addProperty("write_succeed", true);
             obj.addProperty("fail_cause", "none");
 
+            LOGGER.info("write article succeed: " + article);
         } else {
             obj.addProperty("write_succeed", false);
             obj.addProperty("fail_cause", "no session");
+            LOGGER.info("write article failed cause: no session");
         }
 
         obj.addProperty("timestamp", TimeUtil.getTimeStamp());
 
-        LOGGER.info("write article succeed: " + (profile != null) + ", article: " + article);
 
         return obj.toString();
     }
