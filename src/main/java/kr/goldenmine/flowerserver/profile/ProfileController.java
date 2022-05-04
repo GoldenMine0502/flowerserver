@@ -65,8 +65,8 @@ public class ProfileController {
     }
 
     @PostMapping("/register")
-    public String register(String id, String password) throws IOException {
-        boolean isRegistered = profileService.addProfile(new Profile(id, password, null, null, null, new ArrayList<>()));
+    public String register(String id, String password, String nickname) throws IOException {
+        boolean isRegistered = profileService.addProfile(new Profile(id, password, nickname, null, null, null, new ArrayList<>()));
 
         LOGGER.info("new account registered: id: " + id + ", password: " + password + ", isRegistered: " + isRegistered);
 

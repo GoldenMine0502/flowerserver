@@ -6,6 +6,7 @@ import java.util.List;
 public class Profile implements Cloneable {
     private String id;
     private String password;
+    private String nickname;
     private String imageUrl;
     private String rank;
     private String introduction;
@@ -17,11 +18,12 @@ public class Profile implements Cloneable {
         articleIdsKey = new Object();
     }
 
-    public Profile(String id, String password, String imageUrl, String rank, String introduction, List<Integer> articleIds) {
+    public Profile(String id, String password, String nickname, String imageUrl, String rank, String introduction, List<Integer> articleIds) {
         articleIdsKey = new Object();
 
         this.id = id;
         this.password = password;
+        this.nickname = nickname;
         this.imageUrl = imageUrl;
         this.rank = rank;
         this.introduction = introduction;
@@ -50,6 +52,10 @@ public class Profile implements Cloneable {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getNickname() {
+        return nickname;
     }
 
     public String getRank() {
