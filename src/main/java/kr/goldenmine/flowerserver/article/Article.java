@@ -8,17 +8,17 @@ public class Article {
     private String authorId;
     private String title;
     private String context;
-    private List<Integer> imageIds;
+    private int imageCount;
     private List<Comment> comments;
 
     private transient final Object commentsKey = new Object();
 
-    public Article(int id, String authorId, String title, String context, List<Integer> imageIds, List<Comment> comments) {
+    public Article(int id, String authorId, String title, String context, int imageCount, List<Comment> comments) {
         this.id = id;
         this.authorId = authorId;
         this.title = title;
         this.context = context;
-        this.imageIds = imageIds;
+        this.imageCount = imageCount;
         this.comments = comments;
     }
 
@@ -38,13 +38,10 @@ public class Article {
         return context;
     }
 
-    public List<Integer> getImageIds() {
-        return imageIds;
-    }
 
     @Override
     public String toString() {
-        return "id: " + id + ", title" + title + ", context: " + context + ", imageIds: " + imageIds;
+        return "id: " + id + ", title" + title + ", context: " + context + ", imageCounts: " + imageCount + ", " + "comments: " + comments;
     }
 
     public int getRootParentComment(int start) {
@@ -73,5 +70,9 @@ public class Article {
                 comments.add(comment);
             }
         }
+    }
+
+    public int getImageCount() {
+        return imageCount;
     }
 }

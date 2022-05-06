@@ -1,5 +1,10 @@
-package kr.goldenmine.flowerserver;
+package kr.goldenmine.flowerserver.file;
 
+import com.google.gson.JsonObject;
+import kr.goldenmine.flowerserver.Response;
+import kr.goldenmine.flowerserver.article.Article;
+import kr.goldenmine.flowerserver.article.ArticleService;
+import kr.goldenmine.flowerserver.utils.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,67 +23,62 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@RestController
+//@RestController
 @RequestMapping("/images")
 public class FileController {
 
     private static final Logger logger = LoggerFactory.getLogger(FileController.class);
+
+    private final ArticleService articleService;
     private final StorageService storageService;
 
     @Autowired
-    public FileController(StorageService storageService) {
+    public FileController(ArticleService articleService, StorageService storageService) {
+        this.articleService = articleService;
         this.storageService = storageService;
     }
 
-    @PostMapping("/upload")
-    public ResponseEntity<Response> uploadImage(@RequestParam("file") MultipartFile file,
-                                                @RequestParam("id") String userName) throws IOException {
-        Response res = new Response();
-        try {
-            String result = storageService.saveFile(file, userName);
-            res.setImageLocation("/" + userName + "/" + result);
-            res.setMessage("done");
-            res.setSuccess(true);
-            return new ResponseEntity<Response>(res, HttpStatus.OK);
-        } catch (Exception e) {
-            res.setMessage("failed");
-            res.setSuccess(false);
-            return new ResponseEntity<Response>(res, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
 
     @PostMapping("/post/upload")
-    public ResponseEntity<Response> postImageUpload(@RequestParam("files") MultipartFile[] files,
-                                                    @RequestParam("id") String postName) {
-        Response res = new Response();
-        List<String> results = new ArrayList<>();
-        List<String> imageLocations = new ArrayList<>();
-        try {
-            results = storageService.saveFiles(files, postName);
-            for (String result : results) {
-                imageLocations.add("/" + postName + "/" + result);
+    public String imageUpload(@RequestParam("files") MultipartFile[] files,
+                                                    @RequestParam("id") int articleId) throws IOException {
+        Article article = articleService.getArticle(articleId);
+
+        JsonObject obj = new JsonObject();
+        
+        if(article != null) {
+            int count = files.length;
+            
+            try {
+                // 파일 포맷: 글id-이미지번호.jpg
+                storageService.saveImages(files, articleId);
+                obj.addProperty("succeed", true);
+                obj.addProperty("image_counts", count);
+                obj.addProperty("fail_cause", "none");
+            } catch (Exception ex) {
+                obj.addProperty("succeed", false);
+                obj.addProperty("image_counts", count);
+                obj.addProperty("fail_cause", ex.getMessage());
             }
-            res.setImageLocations(imageLocations);
-            res.setMessage("done");
-            res.setSuccess(true);
-            return new ResponseEntity<Response>(res, HttpStatus.OK);
-        } catch (Exception e) {
-            res.setMessage("failed");
-            res.setSuccess(false);
-            return new ResponseEntity<Response>(res, HttpStatus.INTERNAL_SERVER_ERROR);
+        } else {
+            obj.addProperty("succeed", false);
+            obj.addProperty("image_counts", -1);
+            obj.addProperty("fail_cause", "no article");
         }
+        
+        obj.addProperty("timestamp", TimeUtil.getTimeStamp());
+        
+        return obj.toString();
     }
 
     @GetMapping("/display/{userName}/{fileName:.+}")
     public ResponseEntity<Resource> displayImage(@PathVariable String fileName,
-                                                 @PathVariable String userName,
                                                  HttpServletRequest request) {
         // Load file as Resource
-
         Resource resource = null;
 
         try {
-            resource = storageService.loadFileAsResource(userName, fileName);
+            resource = storageService.loadFileAsResource(fileName);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

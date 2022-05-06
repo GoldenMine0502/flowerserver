@@ -1,4 +1,4 @@
-package kr.goldenmine.flowerserver;
+package kr.goldenmine.flowerserver.file;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

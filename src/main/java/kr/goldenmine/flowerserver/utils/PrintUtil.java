@@ -1,4 +1,4 @@
-package kr.goldenmine.flowerserver;
+package kr.goldenmine.flowerserver.utils;
 
 public class PrintUtil {
 

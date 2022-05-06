@@ -1,4 +1,4 @@
-package kr.goldenmine.flowerserver;
+package kr.goldenmine.flowerserver.utils;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;

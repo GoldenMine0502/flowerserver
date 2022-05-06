@@ -1,16 +1,22 @@
 package kr.goldenmine.flowerserver.article;
 
 import com.google.gson.JsonObject;
-import kr.goldenmine.flowerserver.PrintUtil;
-import kr.goldenmine.flowerserver.TimeUtil;
+import kr.goldenmine.flowerserver.file.StorageService;
+import kr.goldenmine.flowerserver.utils.PrintUtil;
+import kr.goldenmine.flowerserver.utils.TimeUtil;
 import kr.goldenmine.flowerserver.profile.Profile;
-import kr.goldenmine.flowerserver.profile.ProfileController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,10 +28,12 @@ public class ArticleController {
 
     private final ArticleService articleService;
     private final QuestionService questionService;
+    private final StorageService storageService;
 
-    public ArticleController(ArticleService articleService, QuestionService questionService) {
+    public ArticleController(ArticleService articleService, QuestionService questionService, StorageService storageService) {
         this.articleService = articleService;
         this.questionService = questionService;
+        this.storageService = storageService;
     }
 
     private IArticleService getService(String type) {
@@ -38,7 +46,7 @@ public class ArticleController {
     }
 
     @PostMapping("/writearticle")
-    public String writeArticle(String title, String context, Integer[] imageIds, String type, HttpServletRequest request) throws IOException {
+    public String writeArticle(String title, String context, String type, MultipartFile[] images, HttpServletRequest request) throws IOException {
         HttpSession session = request.getSession();
         Profile profile = (Profile) session.getAttribute("profile");
 
@@ -49,14 +57,24 @@ public class ArticleController {
 
         if(service != null) {
             if (profile != null) {
-                Article article = new Article(0, profile.getId(), title, context, Arrays.asList(imageIds), new LinkedList<>());
+
+                Article article = new Article(0, profile.getId(), title, context, images.length, new LinkedList<>());
                 int id = articleService.writeArticle(profile, article);
-                article = new Article(id, profile.getId(), title, context, Arrays.asList(imageIds), new LinkedList<>());
 
-                obj.addProperty("write_succeed", true);
-                obj.addProperty("fail_cause", "none");
+                try {
+                    storageService.saveImages(images, id);
+                    article = new Article(id, profile.getId(), title, context, images.length, new LinkedList<>());
 
-                LOGGER.info("write article succeed: " + article);
+                    obj.addProperty("write_succeed", true);
+                    obj.addProperty("fail_cause", "none");
+
+                    LOGGER.info("write article succeed: " + article);
+                } catch(IOException ex) {
+                    ex.printStackTrace();
+                    obj.addProperty("write_succeed", false);
+                    obj.addProperty("fail_cause", "fail_image_upload");
+                    LOGGER.info("write article fail cause: fail_image_upload");
+                }
             } else {
                 obj.addProperty("write_succeed", false);
                 obj.addProperty("fail_cause", "no session");
@@ -147,5 +165,36 @@ public class ArticleController {
         } else {
             return Collections.emptyList();
         }
+    }
+
+    @GetMapping("/display/{fileName}")
+    public ResponseEntity<Resource> displayImage(@PathVariable String fileName,
+                                                 HttpServletRequest request) {
+        // Load file as Resource
+        Resource resource = null;
+
+        try {
+            resource = storageService.loadFileAsResource(fileName);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        // Try to determine file's content type
+        String contentType = null;
+        try {
+            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
+        } catch (IOException ex) {
+            LOGGER.info("Could not determine file type.");
+        }
+
+        // Fallback to the default content type if type could not be determined
+        if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                .body(resource);
     }
 }
