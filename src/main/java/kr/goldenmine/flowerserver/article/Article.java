@@ -1,17 +1,22 @@
 package kr.goldenmine.flowerserver.article;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Article {
     private int id;
     private String authorId;
     private String title;
     private String context;
+    private Set<String> plusId;
     private int imageCount;
     private List<Comment> comments;
 
     private transient final Object commentsKey = new Object();
+    private transient final Object plusKey = new Object();
 
     public Article(int id, String authorId, String title, String context, int imageCount, List<Comment> comments) {
         this.id = id;
@@ -20,6 +25,30 @@ public class Article {
         this.context = context;
         this.imageCount = imageCount;
         this.comments = comments;
+
+        this.plusId = new HashSet<>();
+
+//        ConcurrentHashMap
+    }
+
+    public boolean addPlus(String id) {
+        synchronized (plusKey) {
+            return plusId.add(id);
+        }
+    }
+
+    public boolean removePlus(String id) {
+        synchronized (plusKey) {
+            return plusId.remove(id);
+        }
+    }
+
+    public boolean isPlus(String id) {
+        return plusId.contains(id);
+    }
+
+    public int getPlusCount() {
+        return plusId.size();
     }
 
     public int getId() {
