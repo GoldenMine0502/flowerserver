@@ -60,13 +60,13 @@ public class StorageService {
         writeFile(fileName, file);
     }
 
-    public void saveImages(int articleId, MultipartFile[] files) throws IOException {
+    public void saveImages(String type, int articleId, MultipartFile[] files) throws IOException {
         for (int i = 0; i < files.length; i++) {
             MultipartFile multipartFile = files[i];
 
             // ex) 0-0.jpg
 //            String fileName = articleId + "-" + i + "." + StringUtil.getExtension(multipartFile.getOriginalFilename());
-            String fileName = articleId + "-" + i + ".jpg";
+            String fileName = type + "-" + articleId + "-" + i + ".jpg";
 
             writeFile(fileName, multipartFile);
         }

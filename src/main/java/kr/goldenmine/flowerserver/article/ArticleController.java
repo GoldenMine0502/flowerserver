@@ -62,7 +62,7 @@ public class ArticleController {
                 int id = articleService.writeArticle(profile, article);
 
                 try {
-                    storageService.saveImages(images, id);
+                    storageService.saveImages(type, id, images);
                     article = new Article(id, profile.getId(), title, context, images.length, new LinkedList<>());
 
                     obj.addProperty("write_succeed", true);

@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-//@RestController
+@RestController
 @RequestMapping("/images")
 public class FileController {
 
@@ -39,40 +39,40 @@ public class FileController {
     }
 
 
-    @PostMapping("/post/upload")
-    public String imageUpload(@RequestParam("files") MultipartFile[] files,
-                                                    @RequestParam("id") int articleId) throws IOException {
-        Article article = articleService.getArticle(articleId);
+//    @PostMapping("/post/upload")
+//    public String imageUpload(@RequestParam("files") MultipartFile[] files,
+//                                                    @RequestParam("id") int articleId) throws IOException {
+//        Article article = articleService.getArticle(articleId);
+//
+//        JsonObject obj = new JsonObject();
+//
+//        if(article != null) {
+//            int count = files.length;
+//
+//            try {
+//                // 파일 포맷: 글id-이미지번호.jpg
+//                storageService.saveImages(files, articleId);
+//                obj.addProperty("succeed", true);
+//                obj.addProperty("image_counts", count);
+//                obj.addProperty("fail_cause", "none");
+//            } catch (Exception ex) {
+//                obj.addProperty("succeed", false);
+//                obj.addProperty("image_counts", count);
+//                obj.addProperty("fail_cause", ex.getMessage());
+//            }
+//        } else {
+//            obj.addProperty("succeed", false);
+//            obj.addProperty("image_counts", -1);
+//            obj.addProperty("fail_cause", "no article");
+//        }
+//
+//        obj.addProperty("timestamp", TimeUtil.getTimeStamp());
+//
+//        return obj.toString();
+//    }
 
-        JsonObject obj = new JsonObject();
-        
-        if(article != null) {
-            int count = files.length;
-            
-            try {
-                // 파일 포맷: 글id-이미지번호.jpg
-                storageService.saveImages(files, articleId);
-                obj.addProperty("succeed", true);
-                obj.addProperty("image_counts", count);
-                obj.addProperty("fail_cause", "none");
-            } catch (Exception ex) {
-                obj.addProperty("succeed", false);
-                obj.addProperty("image_counts", count);
-                obj.addProperty("fail_cause", ex.getMessage());
-            }
-        } else {
-            obj.addProperty("succeed", false);
-            obj.addProperty("image_counts", -1);
-            obj.addProperty("fail_cause", "no article");
-        }
-        
-        obj.addProperty("timestamp", TimeUtil.getTimeStamp());
-        
-        return obj.toString();
-    }
-
-    @GetMapping("/display/{userName}/{fileName:.+}")
-    public ResponseEntity<Resource> displayImage(@PathVariable String fileName,
+    @GetMapping("/view/{fileName:.+}")
+    public ResponseEntity<Resource> viewImage(@PathVariable String fileName,
                                                  HttpServletRequest request) {
         // Load file as Resource
         Resource resource = null;
@@ -80,6 +80,7 @@ public class FileController {
         try {
             resource = storageService.loadFileAsResource(fileName);
         } catch (FileNotFoundException e) {
+//            logger.info("cannot find the resource: " + fileName);
             e.printStackTrace();
         }
 
