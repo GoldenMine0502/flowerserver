@@ -5,6 +5,7 @@ import kr.goldenmine.flowerserver.Response;
 import kr.goldenmine.flowerserver.article.Article;
 import kr.goldenmine.flowerserver.article.ArticleService;
 import kr.goldenmine.flowerserver.utils.TimeUtil;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,8 +73,8 @@ public class FileController {
 //        return obj.toString();
 //    }
 
-    @GetMapping("/view/{fileName:.+}")
-    public ResponseEntity<Resource> viewImage(@PathVariable String fileName,
+    @GetMapping("/download/{fileName:.+}")
+    public ResponseEntity<Resource> downloadImage(@PathVariable String fileName,
                                                  HttpServletRequest request) {
         // Load file as Resource
         Resource resource = null;
@@ -101,5 +103,16 @@ public class FileController {
                 .contentType(MediaType.parseMediaType(contentType))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
                 .body(resource);
+    }
+
+    @GetMapping(
+            value = "/view/{fileName:.+}",
+            produces = MediaType.IMAGE_JPEG_VALUE
+    )
+    public @ResponseBody byte[] viewImage(@PathVariable String fileName) throws IOException {
+//        logger.info("응애");
+        InputStream in = storageService.loadFileAsResource(fileName).getInputStream();
+//        InputStream in = getClass().getResourceAsStream("/com/baeldung/produceimage/image.jpg");
+        return IOUtils.toByteArray(in);
     }
 }
