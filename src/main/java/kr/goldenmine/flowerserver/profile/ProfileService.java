@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequestMapping("/profile")
 public class ProfileService {
     private Gson gson = new Gson();
     private File saveFile = new File("profile.json");

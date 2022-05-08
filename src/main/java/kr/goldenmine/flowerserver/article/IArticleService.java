@@ -55,17 +55,29 @@ public abstract class IArticleService {
         int startIndex = page * index;
         int finishIndex = startIndex + page;
 
-        int recentStartIndex = articles.size() - finishIndex - 1;
-        int recentFinishIndex = articles.size() - startIndex - 1;
+        int recentStartIndex = articles.size() - finishIndex;
+        int recentFinishIndex = articles.size() - startIndex;
 
         // 범위 밖의 경우 빈 리스트 리턴
-        if(!(recentStartIndex >= 0 && recentStartIndex < articles.size()) ||
-                !(recentFinishIndex >= 0 && recentFinishIndex < articles.size())) {
+
+//        ArticleController.LOGGER.info("index (" + recentStartIndex + ", " + recentFinishIndex + ")");
+
+
+//        ArticleController.LOGGER.info("index (" + recentStartIndex + ", " + recentFinishIndex + ")");
+
+        if(!(recentStartIndex >= 0 && recentStartIndex < articles.size()) &&
+                !(recentFinishIndex >= 0 && recentFinishIndex <= articles.size())) {
             return Collections.emptyList();
         }
-        List<Article> result = articles.subList(recentStartIndex, recentFinishIndex);
+
+        if(recentStartIndex < 0) recentStartIndex = 0;
+        if(recentFinishIndex > articles.size()) recentFinishIndex = articles.size();
+
+        List<Article> result = new ArrayList<>(articles.subList(recentStartIndex, recentFinishIndex));
 
         Collections.reverse(result);
+
+        ArticleController.LOGGER.info("all articles: " + articles);
 
         return result;
     }

@@ -1,22 +1,18 @@
 package kr.goldenmine.flowerserver.article;
 
 public class Comment {
-    private int parentId;
+    int id;
     private String authorId;
     private String comment;
     private int plus;
     private boolean inserted;
 
-    public Comment(int parentId, String authorId, String comment, int plus, boolean inserted) {
-        this.parentId = parentId;
+    public Comment(int id, String authorId, String comment, int plus, boolean inserted) {
+        this.id = id;
         this.authorId = authorId;
         this.comment = comment;
         this.plus = plus;
         this.inserted = inserted;
-    }
-
-    public int getParentId() {
-        return parentId;
     }
 
     public String getAuthorId() {

@@ -1,6 +1,6 @@
 package kr.goldenmine.flowerserver.article;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Article {
@@ -9,17 +9,17 @@ public class Article {
     private String title;
     private String context;
     private List<Integer> imageIds;
-    private List<Comment> comments;
+    private List<Integer> commentIds;
 
     private transient final Object commentsKey = new Object();
 
-    public Article(int id, String authorId, String title, String context, List<Integer> imageIds, List<Comment> comments) {
+    public Article(int id, String authorId, String title, String context, List<Integer> imageIds, List<Integer> commentIds) {
         this.id = id;
         this.authorId = authorId;
         this.title = title;
         this.context = context;
         this.imageIds = imageIds;
-        this.comments = comments;
+        this.commentIds = commentIds;
     }
 
     public int getId() {
@@ -42,36 +42,24 @@ public class Article {
         return imageIds;
     }
 
+    public List<Integer> getCommentIds() {
+        return commentIds;
+    }
+
     @Override
     public String toString() {
-        return "id: " + id + ", title" + title + ", context: " + context + ", imageIds: " + imageIds;
+        return "id: " + id + ", title" + title + ", context: " + context + ", imageIds: " + imageIds + ", comments: " + commentIds;
     }
 
-    public int getRootParentComment(int start) {
-        for(int i = start; i >= 0; i--) {
-            if(!comments.get(i).isInserted()) return i;
-        }
 
-        return -1;
-    }
-
-    public int getLastInsertedComment(int start) {
-        for(int i = start + 1; i < comments.size(); i++) {
-            if(!comments.get(i).isInserted()) return i - 1;
-        }
-
-        return comments.size();
-    }
-
-    public void writeComment(int parentId, Comment comment) {
+    public void addNewCommentId(int index, int commentId) {
         synchronized (commentsKey) {
-            if (comments == null) comments = new LinkedList<>();
+            if (commentIds == null) commentIds = new ArrayList<>();
 
-            if (parentId > -1) {
-                comments.add(parentId, comment);
-            } else {
-                comments.add(comment);
-            }
+            commentIds.add(index, commentId);
         }
     }
+
+
+
 }

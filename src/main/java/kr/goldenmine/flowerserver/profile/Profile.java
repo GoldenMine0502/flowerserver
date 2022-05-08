@@ -77,6 +77,7 @@ public class Profile implements Cloneable {
     public void addNewArticleId(int id) {
         synchronized (articleIdsKey) {
             if(articleIds == null) articleIds = new ArrayList<>();
+
             articleIds.add(id);
         }
     }

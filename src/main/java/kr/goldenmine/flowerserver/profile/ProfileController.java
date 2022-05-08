@@ -46,11 +46,8 @@ public class ProfileController {
 
     @PostMapping("/checksession")
     public String checkSession(HttpServletRequest request) throws IOException {
-
-
         HttpSession session = request.getSession();
         Profile profile = (Profile) session.getAttribute("profile");
-
 
         LOGGER.info("check session: " + (profile != null ? profile.getId() : null));
 

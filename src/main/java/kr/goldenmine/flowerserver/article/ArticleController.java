@@ -18,14 +18,16 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/article")
 public class ArticleController {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ArticleController.class);
+    public static final Logger LOGGER = LoggerFactory.getLogger(ArticleController.class);
 
     private final ArticleService articleService;
     private final QuestionService questionService;
+    private final CommentService commentService;
 
-    public ArticleController(ArticleService articleService, QuestionService questionService) {
+    public ArticleController(ArticleService articleService, QuestionService questionService, CommentService commentService) {
         this.articleService = articleService;
         this.questionService = questionService;
+        this.commentService = commentService;
     }
 
     private IArticleService getService(String type) {
@@ -76,7 +78,7 @@ public class ArticleController {
     }
 
     @PostMapping("/writecomment")
-    public String writeComment(int id, int parentId, @RequestParam("comment") String commentStr, String type, HttpServletRequest request) {
+    public String writeComment(int articleId, int parentIndex, @RequestParam("comment") String commentStr, String type, HttpServletRequest request) {
         HttpSession session = request.getSession();
         Profile profile = (Profile) session.getAttribute("profile");
 
@@ -87,14 +89,13 @@ public class ArticleController {
 
         if(profile != null) {
             if(service != null) {
-                Article article = service.getArticle(id);
+                Article article = service.getArticle(articleId);
 
                 if(article != null) {
-                    boolean isInserted = parentId != -1;
-                    Comment comment = new Comment(parentId, profile.getId(), commentStr, 0, isInserted);
-                    int insertId = isInserted ? article.getLastInsertedComment(parentId) : -1;
+                    boolean isInserted = parentIndex != -1;
+                    Comment comment = new Comment(0, profile.getId(), commentStr, 0, isInserted);
 
-                    article.writeComment(insertId, comment);
+                    commentService.writeComment(article, parentIndex, comment);
 
                     obj.addProperty("write_succeed", true);
                     obj.addProperty("fail_cause", "none");
@@ -108,8 +109,26 @@ public class ArticleController {
             obj.addProperty("fail_cause", "no session");
         }
 
+        obj.addProperty("timestamp", TimeUtil.getTimeStamp());
+
         return obj.toString();
     }
+
+    //    public int getRootParentComment(int start) {
+//        for(int i = start; i >= 0; i--) {
+//            if(!comments.get(i).isInserted()) return i;
+//        }
+//
+//        return -1;
+//    }
+//
+//    public int getLastInsertedComment(int start) {
+//        for(int i = start + 1; i < comments.size(); i++) {
+//            if(!comments.get(i).isInserted()) return i - 1;
+//        }
+//
+//        return comments.size();
+//    }
 
     @PostMapping("/getarticle")
     public Article getArticle(int id, String type) throws IOException {
@@ -118,6 +137,8 @@ public class ArticleController {
         LOGGER.info("get article: " + id);
 
         if(service != null) {
+            Article article = service.getArticle(id);
+            LOGGER.info("article: " + article);
             return service.getArticle(id);
         } else {
             return null;
@@ -140,12 +161,34 @@ public class ArticleController {
     @PostMapping("/recentarticles")
     public List<Article> recentArticles(int page, int index, String type) throws IOException {
         IArticleService service = getService(type);
+
+        LOGGER.info("recent articles: (" + page * index + " ~ " + (page * index + page) + ")");
         if(service != null) {
             List<Article> articles = service.subArticle(page, index);
+
 
             return articles;
         } else {
             return Collections.emptyList();
         }
+    }
+
+    @PostMapping("/getcomment")
+    public Comment getComment(int id, String type) throws IOException {
+        // 모든 글을 누구나 열람 가능하다고 가정
+
+        LOGGER.info("get comment: " + id);
+
+        return commentService.getCommant(id);
+    }
+
+
+    @PostMapping("/getcomments")
+    public List<Comment> getComment(Integer[] ids, String type) throws IOException {
+        // 모든 글을 누구나 열람 가능하다고 가정
+
+        LOGGER.info("get comment: " + PrintUtil.toStringArray(ids));
+
+        return Arrays.stream(ids).map(commentService::getCommant).collect(Collectors.toList());
     }
 }
