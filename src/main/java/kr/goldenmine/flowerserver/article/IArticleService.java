@@ -32,7 +32,7 @@ public abstract class IArticleService {
 
         synchronized (articlesKey) {
             int currentArticleId = articles.size();
-            Article idArticle = new Article(currentArticleId, article.getAuthorId(), article.getTitle(), article.getContext(), article.getImageIds(), new LinkedList<>());
+            Article idArticle = new Article(currentArticleId, article.getAuthorId(), article.getTitle(), article.getContext(), article.getImageCount(), new LinkedList<>());
 
             articles.add(idArticle);
 

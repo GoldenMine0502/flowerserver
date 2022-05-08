@@ -2,6 +2,7 @@ package kr.goldenmine.flowerserver.article;
 
 import com.google.gson.JsonObject;
 import kr.goldenmine.flowerserver.PrintUtil;
+import kr.goldenmine.flowerserver.StorageService;
 import kr.goldenmine.flowerserver.TimeUtil;
 import kr.goldenmine.flowerserver.profile.Profile;
 import kr.goldenmine.flowerserver.profile.ProfileController;
@@ -23,11 +24,13 @@ public class ArticleController {
     private final ArticleService articleService;
     private final QuestionService questionService;
     private final CommentService commentService;
+    private final StorageService storageService;
 
-    public ArticleController(ArticleService articleService, QuestionService questionService, CommentService commentService) {
+    public ArticleController(ArticleService articleService, QuestionService questionService, CommentService commentService, StorageService storageService) {
         this.articleService = articleService;
         this.questionService = questionService;
         this.commentService = commentService;
+        this.storageService = storageService;
     }
 
     private IArticleService getService(String type) {
@@ -40,7 +43,7 @@ public class ArticleController {
     }
 
     @PostMapping("/writearticle")
-    public String writeArticle(String title, String context, Integer[] imageIds, String type, HttpServletRequest request) throws IOException {
+    public String writeArticle(String title, String context, String type, MultipartFile[] images, HttpServletRequest request) throws IOException {
         HttpSession session = request.getSession();
         Profile profile = (Profile) session.getAttribute("profile");
 
@@ -51,14 +54,24 @@ public class ArticleController {
 
         if(service != null) {
             if (profile != null) {
-                Article article = new Article(0, profile.getId(), title, context, Arrays.asList(imageIds), new LinkedList<>());
+
+                Article article = new Article(0, profile.getId(), title, context, images.length, new LinkedList<>());
                 int id = articleService.writeArticle(profile, article);
-                article = new Article(id, profile.getId(), title, context, Arrays.asList(imageIds), new LinkedList<>());
 
-                obj.addProperty("write_succeed", true);
-                obj.addProperty("fail_cause", "none");
+                try {
+                    storageService.saveImages(type, id, images);
+                    article = new Article(id, profile.getId(), title, context, images.length, new LinkedList<>());
 
-                LOGGER.info("write article succeed: " + article);
+                    obj.addProperty("write_succeed", true);
+                    obj.addProperty("fail_cause", "none");
+
+                    LOGGER.info("write article succeed: " + article);
+                } catch(IOException ex) {
+                    ex.printStackTrace();
+                    obj.addProperty("write_succeed", false);
+                    obj.addProperty("fail_cause", "fail_image_upload");
+                    LOGGER.info("write article fail cause: fail_image_upload");
+                }
             } else {
                 obj.addProperty("write_succeed", false);
                 obj.addProperty("fail_cause", "no session");
