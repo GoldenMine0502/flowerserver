@@ -188,7 +188,7 @@ public class ArticleController {
     }
 
     @PostMapping("/getcomment")
-    public Comment getComment(int id, String type) throws IOException {
+    public Comment getComment(int id) throws IOException {
         // 모든 글을 누구나 열람 가능하다고 가정
 
         LOGGER.info("get comment: " + id);
@@ -196,9 +196,8 @@ public class ArticleController {
         return commentService.getCommant(id);
     }
 
-
     @PostMapping("/getcomments")
-    public List<Comment> getComment(Integer[] ids, String type) throws IOException {
+    public List<Comment> getComment(Integer[] ids) throws IOException {
         // 모든 글을 누구나 열람 가능하다고 가정
 
         LOGGER.info("get comment: " + PrintUtil.toStringArray(ids));
