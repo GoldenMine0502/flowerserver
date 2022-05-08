@@ -1,6 +1,7 @@
 package kr.goldenmine.flowerserver.article;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -16,13 +17,15 @@ public class Article {
     private transient final Object commentsKey = new Object();
     private transient final Object plusKey = new Object();
 
-    public Article(int id, String authorId, String title, String context, int imageCounts, List<Integer> commentIds) {
+    public Article(int id, String authorId, String title, String context, int imageCount, List<Integer> commentIds) {
         this.id = id;
         this.authorId = authorId;
         this.title = title;
         this.context = context;
         this.imageCount = imageCount;
         this.commentIds = commentIds;
+
+        plusId = new HashSet<>();
     }
 
     public boolean addPlus(String id) {
