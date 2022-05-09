@@ -59,6 +59,8 @@ public class ArticleController {
                 Article article = new Article(0, profile.getId(), title, context, images.length, new LinkedList<>());
                 int id = articleService.writeArticle(profile, article);
 
+                articleService.save();
+
                 try {
                     storageService.saveImages(type, id, images);
                     article = new Article(id, profile.getId(), title, context, images.length, new LinkedList<>());
@@ -110,6 +112,8 @@ public class ArticleController {
                     Comment comment = new Comment(0, profile.getId(), commentStr, 0, isInserted);
 
                     commentService.writeComment(article, parentIndex, comment);
+
+                    commentService.save();
 
                     obj.addProperty("write_succeed", true);
                     obj.addProperty("fail_cause", "none");

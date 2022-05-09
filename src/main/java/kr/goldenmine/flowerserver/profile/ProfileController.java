@@ -67,6 +67,8 @@ public class ProfileController {
     public String register(String id, String password, String nickname) throws IOException {
         boolean isRegistered = profileService.addProfile(new Profile(id, password, nickname, null, null, null, new ArrayList<>()));
 
+        profileService.save();
+
         LOGGER.info("new account registered: id: " + id + ", password: " + password + ", isRegistered: " + isRegistered);
 
         // 로그아웃 결과 리턴(성공여부, 로그인시간)
@@ -110,7 +112,7 @@ public class ProfileController {
     }
 
     @PostMapping("/profileimage")
-    public String profileImage(MultipartFile file, HttpServletRequest request) {
+    public String setProfileImage(MultipartFile file, HttpServletRequest request) {
         HttpSession session = request.getSession();
 
         Profile profile = (Profile) session.getAttribute("profile");
