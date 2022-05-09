@@ -180,7 +180,6 @@ public class ArticleController {
         if(service != null) {
             List<Article> articles = service.subArticle(page, index);
 
-
             return articles;
         } else {
             return Collections.emptyList();
@@ -197,7 +196,7 @@ public class ArticleController {
     }
 
     @PostMapping("/getcomments")
-    public List<Comment> getComment(Integer[] ids) throws IOException {
+    public List<Comment> getComments(Integer[] ids) throws IOException {
         // 모든 글을 누구나 열람 가능하다고 가정
 
         LOGGER.info("get comment: " + PrintUtil.toStringArray(ids));
