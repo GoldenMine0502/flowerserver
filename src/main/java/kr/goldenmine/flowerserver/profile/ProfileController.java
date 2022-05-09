@@ -95,6 +95,8 @@ public class ProfileController {
         HttpSession session = request.getSession();
         Profile profile = (Profile) session.getAttribute("profile");
 
+        LOGGER.info("current profile " + profile);
+
         return profile;
     }
 
@@ -145,7 +147,6 @@ public class ProfileController {
             obj.addProperty("succeed", false);
             obj.addProperty("fail_cause", "no session");
         }
-
 
         return obj.toString();
     }
