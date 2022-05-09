@@ -31,12 +31,12 @@ public class ProfileController {
     }
 
     @PostMapping("/login")
-    public String login(String id, String password, HttpServletRequest request) throws IOException {
+    public String login(String id, String password) throws IOException {
         Optional<Profile> profile = profileService.login(id, password);
 
         // 로그인 성공시 세션에 현재 로그인 정보 저장
-        HttpSession session = request.getSession();
-        profile.ifPresent(value -> session.setAttribute("profile", value));
+//        HttpSession session = request.getSession();
+//        profile.ifPresent(value -> session.setAttribute("profile", value));
 
         // 로그인 결과 리턴(성공여부, 로그인시간)
         JsonObject obj = new JsonObject();
@@ -47,22 +47,22 @@ public class ProfileController {
         return obj.toString();
     }
 
-    @PostMapping("/checksession")
-    public String checkSession(HttpServletRequest request) throws IOException {
-        HttpSession session = request.getSession();
-        Profile profile = (Profile) session.getAttribute("profile");
-
-        LOGGER.info("check session: " + (profile != null ? profile.getId() : null));
-
-        // 로그인 결과 리턴(성공여부, 로그인시간)
-        JsonObject obj = new JsonObject();
-
-        obj.addProperty("session_exists", profile != null);
-        obj.addProperty("session_id", profile != null ? profile.getId() : null);
-        obj.addProperty("timestamp", TimeUtil.getTimeStamp());
-
-        return obj.toString();
-    }
+//    @PostMapping("/checksession")
+//    public String checkSession(HttpServletRequest request) throws IOException {
+//        HttpSession session = request.getSession();
+//        Profile profile = (Profile) session.getAttribute("profile");
+//
+//        LOGGER.info("check session: " + (profile != null ? profile.getId() : null));
+//
+//        // 로그인 결과 리턴(성공여부, 로그인시간)
+//        JsonObject obj = new JsonObject();
+//
+//        obj.addProperty("session_exists", profile != null);
+//        obj.addProperty("session_id", profile != null ? profile.getId() : null);
+//        obj.addProperty("timestamp", TimeUtil.getTimeStamp());
+//
+//        return obj.toString();
+//    }
 
     @PostMapping("/register")
     public String register(String id, String password, String nickname) throws IOException {
@@ -91,42 +91,39 @@ public class ProfileController {
     }
 
     @GetMapping("/currentprofile")
-    public Profile currentProfile(HttpServletRequest request) throws IOException {
-        HttpSession session = request.getSession();
-        Profile profile = (Profile) session.getAttribute("profile");
+    public Profile currentProfile(String id, String password) throws IOException {
+        Optional<Profile> profile = profileService.login(id, password);
 
         LOGGER.info("current profile " + profile);
 
-        return profile;
+        return profile.orElse(null);
     }
 
-    @PostMapping("/logout")
-    public String logout(HttpServletRequest request) throws IOException {
-        HttpSession session = request.getSession();
-
-        Profile profile = (Profile) session.getAttribute("profile");
-
-        // 세션에 저장된 프로필 제거
-        if(profile != null) {
-            session.removeAttribute("profile");
-        }
-
-        // 로그아웃 결과 리턴(성공여부, 로그인시간)
-        JsonObject obj = new JsonObject();
-
-        obj.addProperty("logout_succeed", profile != null);
-        obj.addProperty("timestamp", TimeUtil.getTimeStamp());
-
-        LOGGER.info("logout request succeed: " + (profile != null) + " id: " + (profile != null ? profile.getId() : null));
-
-        return obj.toString();
-    }
+//    @PostMapping("/logout")
+//    public String logout(HttpServletRequest request) throws IOException {
+//        HttpSession session = request.getSession();
+//
+//        Profile profile = (Profile) session.getAttribute("profile");
+//
+//        // 세션에 저장된 프로필 제거
+//        if(profile != null) {
+//            session.removeAttribute("profile");
+//        }
+//
+//        // 로그아웃 결과 리턴(성공여부, 로그인시간)
+//        JsonObject obj = new JsonObject();
+//
+//        obj.addProperty("logout_succeed", profile != null);
+//        obj.addProperty("timestamp", TimeUtil.getTimeStamp());
+//
+//        LOGGER.info("logout request succeed: " + (profile != null) + " id: " + (profile != null ? profile.getId() : null));
+//
+//        return obj.toString();
+//    }
 
     @PostMapping("/profileimage")
-    public String setProfileImage(MultipartFile file, HttpServletRequest request) {
-        HttpSession session = request.getSession();
-
-        Profile profile = (Profile) session.getAttribute("profile");
+    public String setProfileImage(String id, String password, MultipartFile file) {
+        Profile profile = profileService.login(id, password).orElse(null);
 
         JsonObject obj = new JsonObject();
 
