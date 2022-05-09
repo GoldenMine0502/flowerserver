@@ -5,6 +5,7 @@ import kr.goldenmine.flowerserver.file.StorageService;
 import kr.goldenmine.flowerserver.utils.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -87,6 +88,14 @@ public class ProfileController {
         LOGGER.info("account request received: " + id + ", " + profile.orElse(null));
 
         return profile.orElse(null);
+    }
+
+    @GetMapping("/currentprofile")
+    public Profile currentProfile(HttpServletRequest request) throws IOException {
+        HttpSession session = request.getSession();
+        Profile profile = (Profile) session.getAttribute("profile");
+
+        return profile;
     }
 
     @PostMapping("/logout")
