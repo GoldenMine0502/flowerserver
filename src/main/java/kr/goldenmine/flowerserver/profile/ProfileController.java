@@ -90,7 +90,7 @@ public class ProfileController {
         return profile.orElse(null);
     }
 
-    @GetMapping("/currentprofile")
+    @PostMapping("/currentprofile")
     public Profile currentProfile(String id, String password) throws IOException {
         Optional<Profile> profile = profileService.login(id, password);
 
