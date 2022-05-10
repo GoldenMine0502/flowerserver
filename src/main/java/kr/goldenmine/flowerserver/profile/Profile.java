@@ -133,4 +133,8 @@ public class Profile implements Cloneable, UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
+    public List<String> getRoles() {
+        return roles;
+    }
 }

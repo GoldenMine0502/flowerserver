@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import kr.goldenmine.flowerserver.file.StorageService;
 import kr.goldenmine.flowerserver.profile.Profile;
 import kr.goldenmine.flowerserver.profile.ProfileController;
-import kr.goldenmine.flowerserver.profile.ProfileService;
 import kr.goldenmine.flowerserver.utils.PrintUtil;
 import kr.goldenmine.flowerserver.utils.TimeUtil;
 import org.slf4j.Logger;
@@ -27,19 +26,12 @@ public class ArticleController {
     private final QuestionService questionService;
     private final CommentService commentService;
     private final StorageService storageService;
-    private final ProfileService profileService;
 
-    public ArticleController(ArticleService articleService,
-                             QuestionService questionService,
-                             CommentService commentService,
-                             StorageService storageService,
-                             ProfileService profileService
-    ) {
+    public ArticleController(ArticleService articleService, QuestionService questionService, CommentService commentService, StorageService storageService) {
         this.articleService = articleService;
         this.questionService = questionService;
         this.commentService = commentService;
         this.storageService = storageService;
-        this.profileService = profileService;
     }
 
     private IArticleService getService(String type) {
@@ -52,8 +44,9 @@ public class ArticleController {
     }
 
     @PostMapping("/writearticle")
-    public String writeArticle(String id, String password, String title, String context, String type, MultipartFile[] images) throws IOException {
-        Profile profile = profileService.login(id, password).orElse(null);
+    public String writeArticle(String title, String context, String type, MultipartFile[] images, HttpServletRequest request) throws IOException {
+        HttpSession session = request.getSession();
+        Profile profile = (Profile) session.getAttribute("profile");
 
         IArticleService service = getService(type);
 
@@ -64,13 +57,13 @@ public class ArticleController {
             if (profile != null) {
 
                 Article article = new Article(0, profile.getId(), title, context, images.length, new LinkedList<>());
-                int articleId = articleService.writeArticle(profile, article);
+                int id = articleService.writeArticle(profile, article);
 
                 articleService.save();
 
                 try {
-                    storageService.saveImages(type, articleId, images);
-                    article = new Article(articleId, profile.getId(), title, context, images.length, new LinkedList<>());
+                    storageService.saveImages(type, id, images);
+                    article = new Article(id, profile.getId(), title, context, images.length, new LinkedList<>());
 
                     obj.addProperty("write_succeed", true);
                     obj.addProperty("fail_cause", "none");
@@ -101,8 +94,10 @@ public class ArticleController {
     }
 
     @PostMapping("/writecomment")
-    public String writeComment(String id, String password, int articleId, int parentIndex, @RequestParam("comment") String commentStr, String type) {
-        Profile profile = profileService.login(id, password).orElse(null);
+    public String writeComment(int articleId, int parentIndex, @RequestParam("comment") String commentStr, String type, HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        Profile profile = (Profile) session.getAttribute("profile");
+
         IArticleService service = getService(type);
 
         // 글 쓰기 결과 리턴
