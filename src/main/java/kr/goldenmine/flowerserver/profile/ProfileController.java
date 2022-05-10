@@ -63,6 +63,7 @@ public class ProfileController {
 
         obj.addProperty("session_exists", profile != null);
         obj.addProperty("session_id", profile != null ? profile.getId() : null);
+//        obj.addProperty("session_token", )
         obj.addProperty("timestamp", TimeUtil.getTimeStamp());
 
         return obj.toString();
