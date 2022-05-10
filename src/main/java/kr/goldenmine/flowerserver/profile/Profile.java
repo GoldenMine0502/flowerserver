@@ -1,9 +1,18 @@
 package kr.goldenmine.flowerserver.profile;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.data.annotation.Id;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-public class Profile implements Cloneable {
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class Profile implements Cloneable, UserDetails {
+    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
     private String password;
     private String nickname;
@@ -11,6 +20,8 @@ public class Profile implements Cloneable {
     private String rank;
     private String introduction;
     private List<Integer> articleIds;
+
+    private List<String> roles = new ArrayList<>();
 
     private transient final Object articleIdsKey;
 
@@ -89,5 +100,37 @@ public class Profile implements Cloneable {
     @Override
     public String toString() {
         return "id: " + id + ", password: " + password + ", imageUrl: " + imageUrl + ", rank: " + rank + ", introduction" + introduction + ", articleIds: " + articleIds;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return this.roles.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public String getUsername() {
+        return id;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }
