@@ -62,15 +62,15 @@ public class ArticleController {
 
         if(service != null) {
             if (profile != null) {
-
-                Article article = new Article(0, profile.getId(), title, context, images.length, new LinkedList<>());
+                int imagesLen = images != null ? images.length : 0;
+                Article article = new Article(0, profile.getId(), title, context, imagesLen, new LinkedList<>());
                 int articleId = articleService.writeArticle(profile, article);
 
                 articleService.save();
 
                 try {
                     storageService.saveImages(type, articleId, images);
-                    article = new Article(articleId, profile.getId(), title, context, images.length, new LinkedList<>());
+                    article = new Article(articleId, profile.getId(), title, context, imagesLen, new LinkedList<>());
 
                     obj.addProperty("write_succeed", true);
                     obj.addProperty("fail_cause", "none");
