@@ -36,6 +36,7 @@ public class Profile implements Cloneable {
         profile.id = id;
         profile.password = password;
         profile.imageUrl = imageUrl;
+        profile.nickname = nickname;
         profile.rank = rank;
         profile.introduction = introduction;
         if(articleIds != null) {
