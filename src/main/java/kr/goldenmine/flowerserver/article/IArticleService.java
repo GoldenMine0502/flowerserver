@@ -6,10 +6,9 @@ import kr.goldenmine.flowerserver.profile.Profile;
 
 import java.io.*;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class IArticleService {
     private final Gson gson = new Gson();
@@ -32,7 +31,7 @@ public abstract class IArticleService {
 
         synchronized (articlesKey) {
             int currentArticleId = articles.size();
-            Article idArticle = new Article(currentArticleId, article.getAuthorId(), article.getTitle(), article.getContext(), article.getImageCount(), new LinkedList<>());
+            Article idArticle = new Article(currentArticleId, article.getAuthorId(), article.getTitle(), article.getContext(), article.getWeather(), article.getImageCount(), new LinkedList<>());
 
             articles.add(idArticle);
 
@@ -44,6 +43,28 @@ public abstract class IArticleService {
         return articleId;
     }
 
+    public List<Article> randomArticle(int page, int index) {
+        int times = articles.size();
+
+        List<Article> copy = new ArrayList<>(articles);
+
+        Collections.shuffle(copy);
+
+        return copy.stream().skip((long) page * index).limit(page).collect(Collectors.toList());
+    }
+
+    public List<Article> popularArticle(int page, int index) {
+        List<Article> copy = new ArrayList<>(articles);
+
+        Collections.sort(copy, new Comparator<Article>() {
+            @Override
+            public int compare(Article o1, Article o2) {
+                return Integer.compare(o1.getPlusCount(), o2.getPlusCount());
+            }
+        });
+
+        return copy.stream().skip((long) page * index).limit(page).collect(Collectors.toList());
+    }
 
     public List<Article> subArticle(int page, int index) {
         // 글이 0,1,2,3,4,5,6,7,8,9 인덱스

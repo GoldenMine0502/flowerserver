@@ -10,6 +10,7 @@ public class Article {
     private String authorId;
     private String title;
     private String context;
+    private String weather;
     private Set<String> plusId;
     private int imageCount;
     private List<Integer> commentIds;
@@ -17,13 +18,14 @@ public class Article {
     private transient final Object commentsKey = new Object();
     private transient final Object plusKey = new Object();
 
-    public Article(int id, String authorId, String title, String context, int imageCount, List<Integer> commentIds) {
+    public Article(int id, String authorId, String title, String context, String weather, int imageCount, List<Integer> commentIds) {
         this.id = id;
         this.authorId = authorId;
         this.title = title;
         this.context = context;
         this.imageCount = imageCount;
         this.commentIds = commentIds;
+        this.weather = weather;
 
         plusId = new HashSet<>();
     }
@@ -62,6 +64,10 @@ public class Article {
 
     public String getContext() {
         return context;
+    }
+
+    public String getWeather() {
+        return weather;
     }
 
     public int getImageCount() {

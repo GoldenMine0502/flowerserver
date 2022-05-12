@@ -52,7 +52,7 @@ public class ArticleController {
     }
 
     @PostMapping("/writearticle")
-    public String writeArticle(String id, String password, String title, String context, String type, MultipartFile[] images) throws IOException {
+    public String writeArticle(String id, String password, String title, String context, String weather, String type, MultipartFile[] images) throws IOException {
         Profile profile = profileService.login(id, password).orElse(null);
 
         IArticleService service = getService(type);
@@ -63,14 +63,14 @@ public class ArticleController {
         if(service != null) {
             if (profile != null) {
                 int imagesLen = images != null ? images.length : 0;
-                Article article = new Article(0, profile.getId(), title, context, imagesLen, new LinkedList<>());
+                Article article = new Article(0, profile.getId(), title, context, weather, imagesLen, new LinkedList<>());
                 int articleId = articleService.writeArticle(profile, article);
 
                 articleService.save();
 
                 try {
                     storageService.saveImages(type, articleId, images);
-                    article = new Article(articleId, profile.getId(), title, context, imagesLen, new LinkedList<>());
+                    article = new Article(articleId, profile.getId(), title, context, weather, imagesLen, new LinkedList<>());
 
                     obj.addProperty("write_succeed", true);
                     obj.addProperty("fail_cause", "none");
@@ -181,13 +181,20 @@ public class ArticleController {
         }
     }
 
-    @PostMapping("/recentarticles")
-    public List<Article> recentArticles(int page, int index, String type) throws IOException {
-        IArticleService service = getService(type);
+    @PostMapping("/feedarticles")
+    public List<Article> feedArticles(int page, int index, String articleType, String sortType) throws IOException {
+        IArticleService service = getService(articleType);
 
         LOGGER.info("recent articles: (" + page * index + " ~ " + (page * index + page) + ")");
         if(service != null) {
-            List<Article> articles = service.subArticle(page, index);
+            List<Article> articles;
+            if(sortType.equals("popular")) {
+                articles = service.popularArticle(page, index);
+            } else if(sortType.equals("random")) {
+                articles = service.randomArticle(page, index);
+            } else /*if(sortType.equals("recent"))*/ {
+                articles = service.subArticle(page, index);
+            }
 
             return articles;
         } else {
@@ -211,5 +218,105 @@ public class ArticleController {
         LOGGER.info("get comment: " + PrintUtil.toStringArray(ids));
 
         return Arrays.stream(ids).map(commentService::getCommant).collect(Collectors.toList());
+    }
+
+    @PostMapping("/plus")
+    public String plus(String id, String password, String type, int articleId) {
+        LOGGER.info("plus: " + id + ", id: " + articleId);
+
+        Profile profile = profileService.login(id, password).orElse(null);
+        IArticleService service = getService(type);
+
+        // 글 쓰기 결과 리턴
+        JsonObject obj = new JsonObject();
+
+        if(profile != null) {
+            if(service != null) {
+                Article article = service.getArticle(articleId);
+
+                if(article != null) {
+                    article.addPlus(id);
+
+                    obj.addProperty("write_succeed", true);
+                    obj.addProperty("fail_cause", "none");
+                }
+            } else {
+                obj.addProperty("write_succeed", true);
+                obj.addProperty("fail_cause", "no service: " + type);
+            }
+        } else {
+            obj.addProperty("write_succeed", false);
+            obj.addProperty("fail_cause", "no session");
+        }
+
+        obj.addProperty("timestamp", TimeUtil.getTimeStamp());
+
+        return obj.toString();
+    }
+
+    @GetMapping("/isplus")
+    public String isPlus(String id, String password, String type, int articleId) {
+        LOGGER.info("isplus: " + id + ", id: " + articleId);
+
+        Profile profile = profileService.login(id, password).orElse(null);
+        IArticleService service = getService(type);
+
+        // 글 쓰기 결과 리턴
+        JsonObject obj = new JsonObject();
+
+        if(profile != null) {
+            if(service != null) {
+                Article article = service.getArticle(articleId);
+
+                if(article != null) {
+                    obj.addProperty("plus", article.isPlus(id));
+                    obj.addProperty("fail_cause", "none");
+                }
+            } else {
+                obj.addProperty("plus", false);
+                obj.addProperty("fail_cause", "no service: " + type);
+            }
+        } else {
+            obj.addProperty("plus", false);
+            obj.addProperty("fail_cause", "no session");
+        }
+
+        obj.addProperty("timestamp", TimeUtil.getTimeStamp());
+
+        return obj.toString();
+    }
+
+    @PostMapping("/unplus")
+    public String unplus(String id, String password, String type, int articleId) {
+        LOGGER.info("unplus: " + id + ", id: " + articleId);
+
+        Profile profile = profileService.login(id, password).orElse(null);
+        IArticleService service = getService(type);
+
+        // 글 쓰기 결과 리턴
+        JsonObject obj = new JsonObject();
+
+        if(profile != null) {
+            if(service != null) {
+                Article article = service.getArticle(articleId);
+
+                if(article != null) {
+                    article.removePlus(id);
+
+                    obj.addProperty("write_succeed", true);
+                    obj.addProperty("fail_cause", "none");
+                }
+            } else {
+                obj.addProperty("write_succeed", true);
+                obj.addProperty("fail_cause", "no service: " + type);
+            }
+        } else {
+            obj.addProperty("write_succeed", false);
+            obj.addProperty("fail_cause", "no session");
+        }
+
+        obj.addProperty("timestamp", TimeUtil.getTimeStamp());
+
+        return obj.toString();
     }
 }
