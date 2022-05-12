@@ -48,6 +48,7 @@ public class Profile implements Cloneable, UserDetails {
         profile.password = password;
         profile.imageUrl = imageUrl;
         profile.rank = rank;
+        profile.nickname = nickname;
         profile.introduction = introduction;
         if(articleIds != null) {
             profile.articleIds = new ArrayList<>(articleIds);
