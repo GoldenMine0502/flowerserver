@@ -66,7 +66,7 @@ public class ProfileController {
 
     @PostMapping("/register")
     public String register(String id, String password, String nickname) throws IOException {
-        boolean isRegistered = profileService.addProfile(new Profile(id, password, nickname, null, null, null, new ArrayList<>()));
+        boolean isRegistered = profileService.addProfile(new Profile(id, password, nickname, null, null, null, new ArrayList<>(), new ArrayList<>()));
 
         profileService.save();
 
@@ -77,6 +77,30 @@ public class ProfileController {
 
         obj.addProperty("register_succeed", isRegistered);
         obj.addProperty("timestamp", TimeUtil.getTimeStamp());
+
+        return obj.toString();
+    }
+
+    @PostMapping("/changeprofile")
+    public String changeProfile(String id, String password, String nickname, String introduction) {
+        Profile profile = profileService.login(id, password).orElse(null);
+
+        JsonObject obj = new JsonObject();
+
+        if (profile != null) {
+            profile.setNickname(nickname);
+            profile.setIntroduction(introduction);
+
+            profileService.save();
+
+            obj.addProperty("succeed", true);
+            obj.addProperty("fail_cause", "none");
+
+            LOGGER.info(profile.getId() + " tried to set new profile image");
+        } else {
+            obj.addProperty("succeed", false);
+            obj.addProperty("fail_cause", "no session");
+        }
 
         return obj.toString();
     }
@@ -122,13 +146,14 @@ public class ProfileController {
 //    }
 
     @PostMapping("/profileimage")
-    public String setProfileImage(String id, String password, MultipartFile file) {
+    public String profileImage(String id, String password, MultipartFile file) {
         Profile profile = profileService.login(id, password).orElse(null);
 
         JsonObject obj = new JsonObject();
 
-        if(profile != null) {
+        if (profile != null) {
             try {
+                // link: http://environment.goldenmine.kr:8080/images/view/id.jpg
                 storageService.saveProfileImage(profile, file);
 
                 obj.addProperty("succeed", true);

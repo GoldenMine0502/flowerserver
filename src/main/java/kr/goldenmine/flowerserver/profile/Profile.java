@@ -11,15 +11,19 @@ public class Profile implements Cloneable {
     private String rank;
     private String introduction;
     private List<Integer> articleIds;
+    private List<Integer> questionIds;
 
     private transient final Object articleIdsKey;
+    private transient final Object questionIdsKey;
 
     public Profile() {
         articleIdsKey = new Object();
+        questionIdsKey = new Object();
     }
 
-    public Profile(String id, String password, String nickname, String imageUrl, String rank, String introduction, List<Integer> articleIds) {
+    public Profile(String id, String password, String nickname, String imageUrl, String rank, String introduction, List<Integer> articleIds, List<Integer> questionIds) {
         articleIdsKey = new Object();
+        questionIdsKey = new Object();
 
         this.id = id;
         this.password = password;
@@ -28,6 +32,15 @@ public class Profile implements Cloneable {
         this.rank = rank;
         this.introduction = introduction;
         this.articleIds = articleIds;
+        this.questionIds = questionIds;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void setIntroduction(String introduction) {
+        this.introduction = introduction;
     }
 
     @Override
@@ -80,6 +93,14 @@ public class Profile implements Cloneable {
             if(articleIds == null) articleIds = new ArrayList<>();
 
             articleIds.add(id);
+        }
+    }
+
+    public void addNewQuestionId(int id) {
+        synchronized (questionIdsKey) {
+            if(questionIds == null) questionIds = new ArrayList<>();
+
+            questionIds.add(id);
         }
     }
 

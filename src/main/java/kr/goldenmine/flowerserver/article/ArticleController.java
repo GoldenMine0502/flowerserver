@@ -254,7 +254,7 @@ public class ArticleController {
         return obj.toString();
     }
 
-    @GetMapping("/isplus")
+    @PostMapping("/isplus")
     public String isPlus(String id, String password, String type, int articleId) {
         LOGGER.info("isplus: " + id + ", id: " + articleId);
 

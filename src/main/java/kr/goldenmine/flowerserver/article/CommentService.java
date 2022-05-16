@@ -8,6 +8,7 @@ import java.io.*;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CommentService {
@@ -36,7 +37,7 @@ public class CommentService {
 
             articleId = currentArticleId;
 
-            index = parentIndex != -1 ? getLastInsertedCommentIndex(article, parentIndex) : article.getCommentIds().size();
+            index = parentIndex != -1 ? getLastInsertedCommentIndex(article.getCommentIds(), parentIndex) : article.getCommentIds().size();
         }
 
         article.addNewCommentId(index, articleId);
@@ -44,13 +45,13 @@ public class CommentService {
         return articleId;
     }
 
-    public int getLastInsertedCommentIndex(Article article, int start) {
-        List<Integer> ids = article.getCommentIds();
-        for (int i = start + 1; i < ids.size(); i++) {
-            if (!comments.get(ids.get(i)).isInserted()) return i - 1;
+    public int getLastInsertedCommentIndex(List<Integer> articleComments, int start) {
+//        List<Integer> ids = articleComments;
+        for (int i = start + 1; i < articleComments.size(); i++) {
+            if (!comments.get(articleComments.get(i)).isInserted()) return i - 1;
         }
 
-        return ids.size();
+        return articleComments.size();
     }
 
     public Comment getCommant(int id) {
